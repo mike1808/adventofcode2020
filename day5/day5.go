@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"sort"
+
+	"github.com/mike1808/adventofcode2020/util"
 )
 
 func Day5() {
@@ -43,7 +45,7 @@ func FindSeatsMaxID(input []string) int {
 	for _, pass := range input {
 		row, col := findSeat(pass)
 		id := getID(row, col)
-		maxID = max(maxID, id)
+		maxID = util.Max(maxID, id)
 	}
 
 	return maxID
@@ -78,13 +80,6 @@ func findSeat(pass string) (int, int) {
 
 func getID(row, col int) int {
 	return row*8 + col
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 func parseInput() ([]string, error) {

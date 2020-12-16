@@ -1,11 +1,10 @@
 package day9
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"os"
-	"strconv"
+
+	"github.com/mike1808/adventofcode2020/util"
 )
 
 func Day9() {
@@ -61,26 +60,7 @@ func CrackTheCode(input []int, windowSize int) int {
 		}
 	}
 
-	return max(input[start:end]...) + min(input[start:end]...)
-}
-
-func max(a ...int) int {
-	m := a[0]
-	for _, n := range a[1:] {
-		if n > m {
-			m = n
-		}
-	}
-	return m
-}
-func min(a ...int) int {
-	m := a[0]
-	for _, n := range a[1:] {
-		if n < m {
-			m = n
-		}
-	}
-	return m
+	return util.Max(input[start:end]...) + util.Min(input[start:end]...)
 }
 
 func parseInput() ([]int, error) {
@@ -89,16 +69,5 @@ func parseInput() ([]int, error) {
 		return nil, err
 	}
 	defer f.Close()
-	return readInput(f)
-}
-
-func readInput(r io.Reader) ([]int, error) {
-	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanLines)
-	var result []int
-	for scanner.Scan() {
-		n, _ := strconv.Atoi(scanner.Text())
-		result = append(result, n)
-	}
-	return result, scanner.Err()
+	return util.ReadIntSlice(f)
 }

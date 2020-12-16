@@ -1,11 +1,10 @@
 package day1
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"os"
-	"strconv"
+
+	"github.com/mike1808/adventofcode2020/util"
 )
 
 const TargetSum = 2020
@@ -54,19 +53,6 @@ func parseInput() ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	return readInts(f)
-}
-
-func readInts(r io.Reader) ([]int, error) {
-	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanWords)
-	var result []int
-	for scanner.Scan() {
-		x, err := strconv.Atoi(scanner.Text())
-		if err != nil {
-			return result, err
-		}
-		result = append(result, x)
-	}
-	return result, scanner.Err()
+	defer f.Close()
+	return util.ReadIntSlice(f)
 }

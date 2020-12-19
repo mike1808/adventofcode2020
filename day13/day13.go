@@ -49,6 +49,7 @@ func Part1(input *Input) int {
 
 // not working
 func Part2(input *Input) int64 {
+	panic("not working")
 	d := int64(1)
 	x := int64(1)
 	pass := false

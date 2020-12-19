@@ -3,6 +3,8 @@ package day9
 import (
 	"strings"
 	"testing"
+
+	"github.com/mike1808/adventofcode2020/util"
 )
 
 func TestDay9(t *testing.T) {
@@ -15,7 +17,7 @@ func TestDay9(t *testing.T) {
 }
 
 func TestFindFirstInvalidNumber(t *testing.T) {
-	input, _ := readInput(strings.NewReader(`35
+	input, _ := util.ReadIntSlice(strings.NewReader(`35
 20
 15
 25
@@ -43,7 +45,7 @@ func TestFindFirstInvalidNumber(t *testing.T) {
 }
 
 func TestCrackTheCode(t *testing.T) {
-	input, _ := readInput(strings.NewReader(`35
+	input, _ := util.ReadIntSlice(strings.NewReader(`35
 20
 15
 25

@@ -10,7 +10,7 @@ import (
 )
 
 type Input struct {
-	Rules         []Rule
+	Rules         []*Rule
 	MyTicket      []int
 	NearbyTickets [][]int
 }
@@ -50,106 +50,118 @@ func Part1(input *Input) int {
 	return rate
 }
 
-func Part2(input *Input) int {
-	// validTickets := [][]int{input.MyTicket}
+func findFieldsMapping(input *Input) []string {
+	tickets := filterOnlyValidTickets(input.NearbyTickets, input.Rules)
+	n := len(input.MyTicket)
 
-	// for _, ticket := range input.NearbyTickets {
-	// 	validTicket := true
+	rulesToI := map[*Rule]map[int]bool{}
+	mapping := make([]string, n)
 
-	// 	for _, n := range ticket {
-	// 		anyValid := false
-	// 		for _, rule := range input.Rules {
-	// 			if isValid(n, rule) {
-	// 				anyValid = true
-	// 			}
-	// 		}
+	for _, rule := range input.Rules {
+		if rulesToI[rule] == nil {
+			rulesToI[rule] = map[int]bool{}
+		}
 
-	// 		if !anyValid {
-	// 			validTicket = false
-	// 			break
-	// 		}
-	// 	}
-	// 	if validTicket {
-	// 		validTickets = append(validTickets, ticket)
-	// 	}
-	// }
-
-	// iToFields := make([]map[string]bool, len(input.MyTicket))
-	// usedFields := map[string]bool{}
-
-	// for _, ticket := range validTickets {
-	// 	for i, n := range ticket {
-	// 		// already assigned
-	// 		if len(iToFields[i]) == 1 {
-	// 			var field string
-	// 			for f := range iToFields[i] {
-	// 				field = f
-	// 			}
-	// 			usedFields[field] = true
-	// 			removeField(&iToFields, i, field, &usedFields)
-	// 			continue
-	// 		}
-
-	// 		validRules := map[string]bool{}
-	// 		for _, rule := range input.Rules {
-	// 			if !usedFields[rule.Name] && isValid(n, rule) {
-	// 				validRules[rule.Name] = true
-	// 			}
-	// 		}
-
-	// 		if len(iToFields[i]) == 0 {
-	// 			iToFields[i] = validRules
-	// 		} else {
-	// 			iToFields[i] = intersection(iToFields[i], validRules)
-	// 		}
-
-	// 		if len(iToFields[i]) == 1 {
-	// 			var field string
-	// 			for f := range iToFields[i] {
-	// 				field = f
-	// 			}
-	// 			usedFields[field] = true
-	// 			removeField(&iToFields, i, field, &usedFields)
-	// 		}
-
-	// 	}
-	// }
-
-	// fmt.Println(iToFields)
-
-	return 0
-}
-
-func intersection(rules1, rules2 map[string]bool) map[string]bool {
-	out := map[string]bool{}
-
-	for r := range rules1 {
-		if rules2[r] {
-			out[r] = true
+		for i := 0; i < n; i++ {
+			for _, ticket := range tickets {
+				if !rulesToI[rule][i] && isValid(ticket[i], rule) {
+					rulesToI[rule][i] = false
+				} else {
+					rulesToI[rule][i] = true
+				}
+			}
 		}
 	}
 
-	return out
+	changedRules := map[*Rule]bool{}
+
+	for {
+		changed := false
+
+		for rule, idxs := range rulesToI {
+			if changedRules[rule] {
+				continue
+			}
+
+			num := 0
+			idx := 0
+			for i, invalid := range idxs {
+				if !invalid {
+					num++
+					idx = i
+				}
+			}
+
+			if num == 1 {
+				changedRules[rule] = true
+				mapping[idx] = rule.Name
+				changed = true
+				deleteIndex(rule, idx, rulesToI)
+			}
+		}
+
+		if !changed {
+			break
+		}
+	}
+
+	return mapping
 }
 
-func removeField(iToFields *[]map[string]bool, except int, fieldToRemove string, usedFields *map[string]bool) {
-	for i, fields := range *iToFields {
-		if i == except {
+func deleteIndex(except *Rule, idx int, rulesToI map[*Rule]map[int]bool) {
+	for rule, idxs := range rulesToI {
+		if rule == except {
 			continue
 		}
 
-		delete(fields, fieldToRemove)
+		if invalid, ok := idxs[idx]; ok && !invalid {
+			idxs[idx] = true
+		}
 	}
 }
 
-func getSingleField(fields map[string]bool) string {
-	for f := range fields {
-		return f
+func Part2(input *Input) int {
+	mapping := findFieldsMapping(input)
+
+	res := 1
+
+	for i, field := range mapping {
+		if strings.Contains(field, "departure") {
+			res *= input.MyTicket[i]
+		}
 	}
-	return ""
+
+	return res
 }
 
-func isValid(n int, rule Rule) bool {
+func filterOnlyValidTickets(tickets [][]int, rules []*Rule) [][]int {
+	validTickets := [][]int{}
+
+	for _, ticket := range tickets {
+		validTicket := true
+
+		for _, n := range ticket {
+			anyValid := false
+			for _, rule := range rules {
+				if isValid(n, rule) {
+					anyValid = true
+				}
+			}
+
+			if !anyValid {
+				validTicket = false
+				break
+			}
+		}
+		if validTicket {
+			validTickets = append(validTickets, ticket)
+		}
+	}
+
+	return validTickets
+}
+
+func isValid(n int, rule *Rule) bool {
 	valid := false
 	for _, r := range rule.Ranges {
 		if n >= r[0] && n <= r[1] {
@@ -218,8 +230,8 @@ func readInput(r io.Reader) (*Input, error) {
 	return input, scanner.Err()
 }
 
-func parseRule(line string) Rule {
-	rule := Rule{}
+func parseRule(line string) *Rule {
+	rule := &Rule{}
 	x := strings.Split(line, ": ")
 	rule.Name = x[0]
 

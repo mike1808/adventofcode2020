@@ -1,6 +1,7 @@
 package day16
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -34,7 +35,7 @@ nearby tickets:
 	}
 }
 
-func TestPart2(t *testing.T) {
+func TestFindFieldsMapping(t *testing.T) {
 	input, _ := readInput(strings.NewReader(`class: 0-1 or 4-19
 row: 0-5 or 8-19
 seat: 0-13 or 16-19
@@ -46,9 +47,9 @@ nearby tickets:
 3,9,18
 15,1,5
 5,14,9`))
-	actual := Part2(input)
-
-	if actual != 71 {
-		t.Errorf("Part2() returned: %d, expected: %d", actual, 71)
+	actual := findFieldsMapping(input)
+	expected := []string{"row", "seat", "class"}
+	if reflect.DeepEqual(actual, expected) {
+		t.Errorf("Part2() returned: %v, expected: %v", actual, expected)
 	}
 }
